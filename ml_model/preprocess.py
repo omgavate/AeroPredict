@@ -108,11 +108,13 @@ class CmapssDataPreprocessor:
         rul_df = load_cmapss_rul(dataset_dir)
 
         # Apply exact same feature engineering to test data
-        df_test_full, _ = prepare_feature_matrix(
+        df_test_full, feature_cols = prepare_feature_matrix(
             raw_test,
             window_size=self.window_size,
             is_training=False
         )
+        if self.feature_names is None:
+            self.feature_names = feature_cols
 
         # Extract only the LAST observed cycle for each unit_number
         last_cycles_idx = df_test_full.groupby('unit_number')['time_in_cycles'].idxmax()
