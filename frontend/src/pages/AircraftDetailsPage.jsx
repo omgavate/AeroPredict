@@ -106,7 +106,7 @@ export default function AircraftDetailsPage() {
 
       setAircraft(result.data);
       setEditMode(false);
-      setSaveMessage(`Aircraft ${result.data.tail_number} updated successfully in database.`);
+      setSaveMessage(`Aircraft ${result.data.tail_number} updated successfully.`);
       setTimeout(() => setSaveMessage(null), 3500);
     } catch (err) {
       setErrorMessage(err.message || 'Error saving aircraft updates.');
@@ -114,7 +114,7 @@ export default function AircraftDetailsPage() {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="Fetching aircraft telemetry and database profile..." />;
+    return <LoadingSpinner message="Loading aircraft profile and telemetry..." />;
   }
 
   if (errorMessage && !aircraft) {
@@ -131,14 +131,6 @@ export default function AircraftDetailsPage() {
 
   return (
     <div>
-      <div className="demo-banner">
-        <span>✈️ <strong>Module 2:</strong> Airframe Diagnostics & Technical Profile</span>
-        <span className="badge bg-white text-primary d-inline-flex align-items-center gap-1">
-          <Database size={13} />
-          <span>{isLive ? 'Live MySQL Record' : 'Offline Mode'}</span>
-        </span>
-      </div>
-
       {saveMessage && (
         <div className="alert alert-success d-flex align-items-center gap-2 py-2 mb-3">
           <CheckCircle size={16} />
@@ -309,7 +301,7 @@ export default function AircraftDetailsPage() {
                   <div className="col-12 text-end pt-2">
                     <button type="submit" className="btn btn-primary d-inline-flex align-items-center gap-2">
                       <Save size={16} />
-                      <span>Update MySQL Record</span>
+                      <span>Save Changes</span>
                     </button>
                   </div>
                 </div>

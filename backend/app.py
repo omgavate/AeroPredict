@@ -24,6 +24,8 @@ else:
 
 from routes.health_routes import health_bp
 from routes.aircraft_routes import aircraft_bp
+from routes.prediction_routes import prediction_bp
+from routes.engine_routes import engine_bp
 
 
 def create_app(test_config=None):
@@ -47,6 +49,8 @@ def create_app(test_config=None):
     # Register Blueprints
     app.register_blueprint(health_bp)
     app.register_blueprint(aircraft_bp)
+    app.register_blueprint(prediction_bp)
+    app.register_blueprint(engine_bp)
 
     # Root informational route
     @app.route('/', methods=['GET'])

@@ -40,18 +40,18 @@ export default function Navbar({ onToggleSidebar, activeTitle = 'Operations Over
           <span className="fw-mono fw-bold text-dark">{currentTime}</span>
         </div>
 
-        {/* Demo Indicator */}
+        {/* Telemetry Status Indicator */}
         <span
           className="badge d-none d-md-inline-block py-2 px-3 rounded-pill text-uppercase"
           style={{
-            backgroundColor: '#EFF6FF',
-            color: '#1D4ED8',
-            border: '1px solid #BFDBFE',
+            backgroundColor: '#F0FDF4',
+            color: '#15803D',
+            border: '1px solid #BBF7D0',
             fontSize: '0.72rem',
             letterSpacing: '0.5px'
           }}
         >
-          ● Demo Simulation Active
+          ● Fleet Telemetry Live
         </span>
 
         {/* Alerts Pill */}

@@ -54,24 +54,21 @@ export default function DashboardPage() {
 
   return (
     <div>
-      {/* Demonstration Header Notice */}
-      <div className="demo-banner">
-        <span>✈️ <strong>Executive Overview:</strong> Turbofan Fleet Health & Predictive Maintenance Platform</span>
-        <span className="badge bg-white text-primary d-inline-flex align-items-center gap-1">
-          <Database size={13} />
-          <span>{isLive ? 'Live MySQL Database' : 'Demonstration Mode'}</span>
-        </span>
-      </div>
-
-      {/* Page Title & Refresh */}
-      <div className="d-flex align-items-center justify-content-between mb-4">
+      {/* Page Title & Actions */}
+      <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
         <div>
           <h4 className="fw-bold text-dark mb-1">Executive Fleet Dashboard</h4>
           <p className="text-secondary small mb-0">
             Real-time aircraft availability, turbofan degradation state and maintenance triage.
           </p>
         </div>
-        <div className="d-flex gap-2">
+        <div className="d-flex align-items-center gap-2">
+          {isLive && (
+            <span className="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center gap-1 px-2 py-1">
+              <Database size={13} />
+              <span>Database Connected</span>
+            </span>
+          )}
           <Link to="/monitoring" className="btn btn-sm btn-primary d-flex align-items-center gap-2">
             <Activity size={16} />
             <span>Live Engine Telemetry</span>
@@ -79,7 +76,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards Row (Module 1 Requirements) */}
+      {/* KPI Cards Row */}
       <div className="row g-3 mb-4">
         <div className="col-12 col-sm-6 col-xl-3">
           <MetricCard

@@ -89,11 +89,6 @@ export default function MaintenancePage() {
 
   return (
     <div>
-      <div className="demo-banner">
-        <span>✈️ <strong>Module 5:</strong> Maintenance Work Order Lifecycle & History</span>
-        <span className="badge bg-white text-primary">Active Work Orders: {records.filter(r => r.status !== 'COMPLETED').length}</span>
-      </div>
-
       {notification && (
         <div className="alert alert-success d-flex align-items-center gap-2 py-2 mb-3">
           <CheckCircle size={16} />

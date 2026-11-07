@@ -32,9 +32,9 @@ export default function Sidebar({ isOpen, onClose }) {
     },
     {
       to: '/predictive',
-      label: 'Predictive RUL (ML)',
+      label: 'Predictive Maintenance',
       icon: Cpu,
-      badge: 'AI'
+      badge: 'RUL'
     },
     {
       to: '/maintenance',
@@ -96,10 +96,10 @@ export default function Sidebar({ isOpen, onClose }) {
                   className="badge rounded-pill"
                   style={{
                     backgroundColor:
-                      item.badge === 'AI' || item.badge === 'Live'
+                      item.badge === 'RUL' || item.badge === 'Live'
                         ? 'rgba(59, 130, 246, 0.25)'
                         : 'rgba(255, 255, 255, 0.1)',
-                    color: item.badge === 'AI' || item.badge === 'Live' ? '#60A5FA' : '#E2E8F0',
+                    color: item.badge === 'RUL' || item.badge === 'Live' ? '#60A5FA' : '#E2E8F0',
                     fontSize: '0.7rem'
                   }}
                 >

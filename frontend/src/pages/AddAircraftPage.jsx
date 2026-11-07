@@ -99,7 +99,7 @@ export default function AddAircraftPage() {
         return;
       }
 
-      alert(`Aircraft ${payload.tail_number} registered successfully in MySQL database!`);
+      alert(`Aircraft ${payload.tail_number} registered successfully!`);
       navigate('/aircraft');
     } catch (err) {
       setGeneralError(err.message || 'Error connecting to backend API.');
@@ -109,11 +109,6 @@ export default function AddAircraftPage() {
 
   return (
     <div>
-      <div className="demo-banner">
-        <span>✈️ <strong>Module 2:</strong> Register Aircraft & Telemetry Unit Mapping</span>
-        <span className="badge bg-white text-primary">MySQL aeropredict_db</span>
-      </div>
-
       <div className="mb-4">
         <Link to="/aircraft" className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 mb-2">
           <ArrowLeft size={16} />
@@ -318,13 +313,13 @@ export default function AddAircraftPage() {
               <span>Data Validation Standards</span>
             </h6>
             <p className="text-secondary small mb-3">
-              Fleet integrity standards enforced by the Flask backend service:
+              Fleet integrity standards enforced during registration:
             </p>
             <ul className="text-secondary small ps-3 mb-0">
-              <li className="mb-2"><strong>Uniqueness:</strong> Registration numbers are unique in the relational table.</li>
+              <li className="mb-2"><strong>Uniqueness:</strong> Registration numbers must be unique across the fleet registry.</li>
               <li className="mb-2"><strong>C-MAPSS Isolation:</strong> Each turbofan unit (1–100) must be uniquely allocated to prevent cross-engine telemetry collisions.</li>
-              <li className="mb-2"><strong>Flight Metrics:</strong> Cycles and accumulated hours validate as non-negative integer thresholds.</li>
-              <li><strong>Cascade Integrity:</strong> Deleting an aircraft will automatically clear associated sensor streams and alerts via InnoDB foreign keys.</li>
+              <li className="mb-2"><strong>Flight Metrics:</strong> Operating cycles and accumulated hours validate as non-negative integer thresholds.</li>
+              <li><strong>Integrity:</strong> Deleting an aircraft will automatically clear associated telemetry records and alerts.</li>
             </ul>
           </div>
         </div>

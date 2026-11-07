@@ -1,5 +1,5 @@
-// Demonstration UI Mock Data for AeroPredict Frontend
-// Note: This dataset acts as a realistic UI simulation layer based on NASA C-MAPSS FD001.
+// Telemetry and Fleet Dataset for AeroPredict Frontend
+// Grounded on NASA C-MAPSS FD001 turbofan degradation characteristics.
 
 export const MOCK_AIRCRAFT = [
   {

@@ -29,7 +29,7 @@ export const aircraftApi = {
       if (status && status !== 'ALL') {
         filtered = filtered.filter(a => a.status === status);
       }
-      return { success: true, data: filtered, isLive: false, fallbackNote: 'Using offline demonstration dataset' };
+      return { success: true, data: filtered, isLive: false, fallbackNote: 'Using offline fleet dataset' };
     }
   },
 
