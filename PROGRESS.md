@@ -17,7 +17,8 @@
 | **Phase 3 (Backend & DB)** | Flask Backend Setup, MySQL Database & Health Check Endpoint | 🟢 **Completed** | 2026-11-07 | 2026-11-07 | Flask app factory, connection pool, aeropredict_db schema DDL, automated tests passing. |
 | **Phase 4 (Aircraft Mgmt)** | Aircraft Fleet Management (Module 2 CRUD & API Integration) | 🟢 **Completed** | 2026-11-07 | 2026-11-07 | End-to-end CRUD APIs, validations, React UI integration, search/filter, automated test suite passing. |
 | **Phase 5 (Data Processing)**| NASA C-MAPSS FD001 Preprocessing & Feature Engineering | 🟢 **Completed** | 2026-11-07 | 2026-11-07 | Clean data loader, statistical audit, 7 invariant sensors dropped, piecewise RUL capping (125 cycles), causal rolling features (45 features), zero-leakage GroupKFold validation, all 6 test suites passed. |
-| **Phase 6 (Model Training)**  | ML Model Training, Evaluation & Artifact Persistence | 🟡 **Ready to Start** | - | - | Awaiting user instruction before training Random Forest regressor. |
+| **Phase 6 (Model Training)**  | ML Model Training, Evaluation & Artifact Persistence | 🟢 **Completed** | 2026-11-07 | 2026-11-07 | RandomForestRegressor baseline trained. 5-fold GroupKFold CV (MAE 11.18, RMSE 16.56). Test evaluation on 100 held-out engines (MAE 12.70, RMSE 17.72). Joblib artifacts & inference engine verified. |
+| **Phase 7 (Telemetry & APIs)**| Live Telemetry Simulation & RUL Prediction REST APIs | 🟡 **Ready to Start** | - | - | Awaiting user instruction to integrate trained model into Flask backend. |
 
 ---
 
@@ -77,6 +78,16 @@
 - [x] Implement `StandardScaler` fitted exclusively on training units to prevent test set data leakage.
 - [x] Validate end-to-end processing pipeline via automated test suite `ml_model/test_preprocessing.py` (6/6 test suites passed).
 
+### Phase 6: Machine Learning Model Training & Evaluation
+- [x] Configure sensible, regularized baseline `RandomForestRegressor` (`n_estimators=100`, `max_depth=18`, `min_samples_split=5`, `min_samples_leaf=2`, `max_features=0.7`, `random_state=42`).
+- [x] Implement engine-ID-based 5-fold `GroupKFold` cross-validation (80 train units, 20 val units per fold, 0 overlap) in `ml_model/train.py`.
+- [x] Measure cross-validation metrics across all 5 folds: Average CV MAE = 11.18 cycles, Average CV RMSE = 16.56 cycles, Overall OOF R² = 0.8419.
+- [x] Train production model on full 100-engine fleet (20,631 records) and compute feature importances (LPT outlet temp `sensor_4_roll_mean` 43.8%, HPC static pressure `sensor_11_roll_mean` 18.1%, cycle count 12.3%).
+- [x] Perform held-out final test evaluation on 100 test engines at final observed cycle against `RUL_FD001.txt`: Capped MAE = 12.70 cycles, RMSE = 17.72 cycles; Raw MAE = 13.77 cycles, RMSE = 18.88 cycles.
+- [x] Persist model artifacts in `ml_model/artifacts/` using Joblib: `random_forest_rul_model.joblib` (10.1 MB), `scaler.joblib`, `feature_names.joblib`, `model_config.joblib`, and `model_metadata.json`.
+- [x] Build prediction engine `ml_model/predict.py` (`RulPredictor`) enforcing identical feature ordering, causal rolling calculation, and aviation health status mapping (`Normal`, `Caution`, `Warning`).
+- [x] Validate model loading and inference fidelity via automated test suite `ml_model/test_model.py` (5/5 tests passed).
+
 ---
 
 ## Project Activity Changelog
@@ -91,3 +102,4 @@
 | 2026-11-07 | Phase 3 | Established Flask backend with isolated venv, MySQL 8.0 connection pool, initialized `aeropredict_db` with all 5 approved tables, built `GET /api/health`, and verified with 5 automated unit tests (100% passing). Phase 3 completed. | AeroPredict Assistant |
 | 2026-11-07 | Phase 4 | Implemented complete Aircraft Fleet Management (Module 2) across Flask REST APIs and React frontend. Enforced field validations, database persistence in `aeropredict_db.aircraft`, seeded initial assets, and verified with 7 new automated integration tests (12 total tests passing). Phase 4 completed. | AeroPredict Assistant |
 | 2026-11-07 | Phase 5 | Processed NASA C-MAPSS FD001 dataset. Created `ml_model/data_loader.py`, `feature_engineering.py`, `preprocess.py`, and `test_preprocessing.py`. Audited 26 columns, dropped 7 zero-variance columns, applied piecewise RUL capping (125 cycles), engineered 45 causal features, enforced zero-leakage GroupKFold (5 folds), and aligned 100 test units with ground-truth RUL. All 6 tests passing. Phase 5 completed. | AeroPredict Assistant |
+| 2026-11-07 | Phase 6 | Trained baseline RandomForestRegressor model on NASA C-MAPSS FD001. Enforced 5-fold GroupKFold CV (Avg MAE: 11.18, Avg RMSE: 16.56). Evaluated on held-out 100 test units (Capped MAE: 12.70, RMSE: 17.72). Persisted artifacts in `ml_model/artifacts/`. Built `RulPredictor` inference engine. Verified with 5 automated tests. Phase 6 completed. | AeroPredict Assistant |
