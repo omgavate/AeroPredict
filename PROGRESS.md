@@ -2,7 +2,7 @@
 
 ## Project Overview
 - **Project Name:** AeroPredict – AI-Powered Aircraft Engine Health Monitoring and Predictive Maintenance System
-- **Current Phase:** Phase 9 (Predictive Maintenance Interface) Completed – Ready for Phase 10
+- **Current Phase:** Phase 11 (Dashboard Integration) Completed – Ready for Phase 12
 - **Last Updated:** 2026-11-07
 
 ---
@@ -21,7 +21,8 @@
 | **Phase 7 (Prediction API)**  | Flask ML Prediction Service, RUL API & Alert Persistence | 🟢 **Completed** | 2026-11-07 | 2026-11-07 | Singleton PredictionService, POST /api/predict with physical sensor validation, risk tiering, maintenance recommendations, MySQL rul_predictions & maintenance_alerts persistence. 10 automated tests passing. |
 | **Phase 8 (Engine Health)**   | Real-Time Sensor Telemetry Ingestion, History & Diagnostics | 🟢 **Completed** | 2026-11-07 | 2026-11-07 | NASA C-MAPSS dataset unit mapping, real 21-sensor ingestion in MySQL, cycle advance, Recharts degradation curves, 7 subsystem health status. 9 automated tests passing (31 total backend tests passing). |
 | **Phase 9 (Predictive Maint)**| React Predictive Maintenance Interface (RUL Display, Triage & Recommendations) | 🟢 **Completed** | 2026-11-07 | 2026-11-07 | Real POST /api/predict integration, aircraft/engine selector, RUL gauge, tone-coded recommendations, prediction history, model metadata, error handling. |
-| **Phase 10 (Work Orders & Alerts)**| Maintenance Work Order Lifecycle & Alert Resolution | 🟡 **Ready to Start** | - | - | Awaiting user instruction before starting Phase 10. |
+| **Phase 10 (Maintenance Mgmt)**| Maintenance Work Order Lifecycle, Scheduling & Airframe History | 🟢 **Completed** | 2026-11-07 | 2026-11-07 | Full CRUD endpoints (/api/maintenance), status tracking (Pending, In Progress, Completed), relational persistence in MySQL, Add/Edit/View modals, filtering, tests passing. |
+| **Phase 11 (Dashboard Integration)**| Unified Executive Dashboard Integration, Real Fleet Metrics & Visual Charts | 🟢 **Completed** | 2026-11-07 | 2026-11-07 | GET /api/dashboard aggregated REST API, 6 KPI cards, Recharts fleet status donut & maintenance distribution bars, engine health degradation index, alert resolution, 49 tests passing. |
 
 ---
 
@@ -132,6 +133,39 @@
 - [x] Verify complete end-to-end integration: `POST /api/predict` result strictly matches `GET /api/predict/latest/<id>` and history.
 - [x] Verify clean Vite frontend production build (`npm run build`).
 
+### Phase 10: Maintenance Management Module
+- [x] Inspect existing frontend, backend, and MySQL database schema (`maintenance_records`, `aircraft`).
+- [x] Support full maintenance status lifecycle in MySQL constraint: `PENDING`, `SCHEDULED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`.
+- [x] Implement `maintenance_service.py` with CRUD queries, field validations, aircraft existence checks, and automatic airframe operational status realignment.
+- [x] Implement REST blueprint in `maintenance_routes.py` (`GET /api/maintenance`, `POST /api/maintenance`, `GET /<id>`, `PUT /<id>`, `DELETE /<id>`, `GET /history/<aircraft_id>`).
+- [x] Implement automated test suite `backend/tests/test_maintenance_api.py` with 9 unit/integration tests (all 9 passing; 40 total backend tests passing).
+- [x] Connect React frontend: create `maintenanceApi.js`, hook up `MaintenancePage.jsx` to live Flask REST API.
+- [x] Implement work orders table with airframe details, priority pills, inline quick-status selectors, and actions.
+- [x] Implement Add Work Order form with real aircraft selection, validations, priority, scheduled date, and technician assignment.
+- [x] Implement Edit Work Order modal with scope updates, status transitions, and completion date tracking.
+- [x] Implement Work Order Details modal for comprehensive diagnostic review.
+- [x] Query 21st.dev MCP server for table and status card conventions.
+- [x] Support pre-selection and dispatch via URL parameters (e.g. `/maintenance?aircraft_id=X`).
+- [x] Verify clean Vite frontend production build (`npm run build`).
+
+### Phase 11: Unified Dashboard Integration Module
+- [x] Inspect existing React dashboard, backend REST APIs, and database schema (`aircraft`, `maintenance_records`, `maintenance_alerts`, `rul_predictions`).
+- [x] Preserve existing 21st.dev component structure, Harbor Blue palette (`#194391`, `#0F172A`, `#DCE6F9`), and responsive navigation layout.
+- [x] Implement `dashboard_service.py` with aggregated queries for KPI stats, fleet health overview, maintenance distribution, recent alerts, fleet quick-scan telemetry, and operational activity.
+- [x] Implement REST blueprint in `dashboard_routes.py` with unified `GET /api/dashboard`, modular sub-endpoints (`/stats`, `/health-overview`, `/alerts`, `/fleet`, `/maintenance-distribution`, `/activity`), and alert resolution (`PUT /api/dashboard/alerts/<id>/resolve`).
+- [x] Implement automated test suite `backend/tests/test_dashboard_api.py` with 9 unit/integration tests (all 9 passing; 49 total backend tests passing).
+- [x] Create frontend API client `dashboardApi.js` supporting both live Flask backend connections and graceful cached fallback data.
+- [x] Update `DashboardPage.jsx` with real backend integration:
+  - 6 KPI metric cards: Total Aircraft, Operational, Under Maintenance, Attention Required, Pending Maintenance, Active Alerts.
+  - Recharts Fleet Operational Status Donut Chart with interactive tooltip and counts.
+  - Recharts Maintenance Work Order Distribution Bar Chart with status and priority breakdowns.
+  - Turbofan Engine Health diagnostic tiles (Mean Health, Mean Est. RUL, Critical Units, Nominal Units) and per-aircraft degradation meters.
+  - Live Recent Maintenance Alerts feed with working "Acknowledge / Resolve" action.
+  - Recent Operational Activity stream combining work orders, alert triggers, and RUL inferences.
+  - Aircraft Fleet Telemetry quick-scan table with direct links to Telemetry (`/monitoring`) and RUL Prognostics (`/predictive`).
+- [x] Implement comprehensive error handling, empty database state handling, and loading spinners.
+- [x] Verify clean Vite frontend production build (`npm run build`).
+
 ---
 
 ## Project Activity Changelog
@@ -151,3 +185,5 @@
 | 2026-11-07 | UI Polish | Refined frontend presentation to remove all development banners, AI/assistant notices, and academic watermarks. Replaced simulation labels with authentic aviation operational status pills. Verified clean Vite production build. | AeroPredict Assistant |
 | 2026-11-07 | Phase 8 | Implemented complete Engine Health Monitoring module. Built `engine_service.py` with C-MAPSS FD001 dataset mapping, REST endpoints in `engine_routes.py` (`/api/aircraft/<id>/sensors/latest`, `/history`, `/advance-cycle`, `/api/aircraft/<id>/engine`, and aliases). Seeded 861 real sensor readings into MySQL `sensor_readings`. Enhanced React frontend (`EngineMonitoringPage.jsx`, `engineApi.js`, `predictionApi.js`) with 21-channel telemetry matrix, 7 subsystem diagnostic statuses, and 4-way Recharts degradation curves. All 31 backend tests passing. Phase 8 completed. | AeroPredict Assistant |
 | 2026-11-07 | Phase 9 | Implemented complete Predictive Maintenance Interface (`PredictiveMaintenancePage.jsx`, `predictionApi.js`). Connected directly to `POST /api/predict` with real-time inference, RUL gauge display, 4-tier risk classification, tone-coded maintenance prescription cards, thermodynamic symptom indicators, and MySQL prediction history logging. Verified end-to-end integration and clean Vite build. Phase 9 completed. | AeroPredict Assistant |
+| 2026-11-07 | Phase 10 | Implemented complete Maintenance Management module across Flask backend (`maintenance_routes.py`, `maintenance_service.py`) and React frontend (`MaintenancePage.jsx`, `maintenanceApi.js`). Supported full status lifecycle (`PENDING`, `SCHEDULED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`), relational joins with `aircraft`, field validations, Add/Edit/View modals, and delete capabilities. Verified with 9 new tests (40 total tests passing) and clean Vite production build. Phase 10 completed. | AeroPredict Assistant |
+| 2026-11-07 | Phase 11 | Implemented complete Executive Dashboard Integration. Built `dashboard_service.py` and `dashboard_routes.py` with aggregated `GET /api/dashboard` and sub-endpoints. Updated `DashboardPage.jsx` with real backend KPIs, Recharts fleet availability donut, maintenance work order distribution bars, engine degradation meters, alert acknowledge/resolve action, and operational activity stream. Verified with 9 new unit tests (49 total tests passing) and clean Vite production build. Phase 11 completed. | AeroPredict Assistant |
