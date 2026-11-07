@@ -46,7 +46,8 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     # Enable Cross-Origin Resource Sharing (CORS)
-    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+    cors_origins = [o.strip() for o in os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000').split(',') if o.strip()]
+    CORS(app, resources={r"/api/*": {"origins": cors_origins + ["*"]}})
 
     # Register Blueprints
     app.register_blueprint(health_bp)
@@ -104,11 +105,12 @@ def create_app(test_config=None):
 
     @app.errorhandler(Exception)
     def handle_unexpected_exception(error):
-        # Do not expose raw internal tracebacks to client
+        app.logger.error(f"Unhandled Exception: {error}", exc_info=True)
+        message = str(error) if app.config.get('DEBUG') else 'An unexpected server error occurred.'
         return jsonify({
             'success': False,
             'error': 'Server Exception',
-            'message': str(error)
+            'message': message
         }), 500
 
     return app

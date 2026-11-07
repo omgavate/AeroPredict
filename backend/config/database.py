@@ -107,7 +107,7 @@ def check_db_connection():
         details['server_version'] = mysql_version
 
         # Test selecting target database
-        cursor.execute(f"SHOW DATABASES LIKE '{DB_NAME}';")
+        cursor.execute("SHOW DATABASES LIKE %s;", (DB_NAME,))
         db_exists = cursor.fetchone() is not None
         details['database_exists'] = db_exists
 
