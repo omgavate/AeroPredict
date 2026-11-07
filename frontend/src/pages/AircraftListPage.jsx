@@ -53,11 +53,11 @@ export default function AircraftListPage() {
   }, [searchTerm, statusFilter]);
 
   const handleDelete = async (id, tailNumber) => {
-    if (window.confirm(`Are you sure you want to permanently remove aircraft ${tailNumber} (ID #${id}) from MySQL fleet database?`)) {
+    if (window.confirm(`Are you sure you want to permanently remove aircraft ${tailNumber} from the fleet registry?`)) {
       try {
         const res = await aircraftApi.delete(id);
         if (res.success) {
-          setNotification(`Aircraft ${tailNumber} removed from database.`);
+          setNotification(`Aircraft ${tailNumber} removed from fleet registry.`);
           setAircraftList(prev => prev.filter(a => a.id !== id));
           setTimeout(() => setNotification(null), 3500);
         }
@@ -69,15 +69,6 @@ export default function AircraftListPage() {
 
   return (
     <div>
-      {/* Live Integration Status Banner */}
-      <div className="demo-banner">
-        <span>✈️ <strong>Module 2:</strong> Aircraft Fleet Management Interface</span>
-        <span className="badge bg-white text-primary d-inline-flex align-items-center gap-1">
-          <Database size={13} />
-          <span>{isLive ? 'Live MySQL Database' : 'Local Standalone Mode'}</span>
-        </span>
-      </div>
-
       {notification && (
         <div className="alert alert-success d-flex align-items-center gap-2 py-2 mb-3">
           <CheckCircle size={16} />
@@ -97,7 +88,7 @@ export default function AircraftListPage() {
         <div>
           <h4 className="fw-bold text-dark mb-1">Aircraft Fleet Inventory</h4>
           <p className="text-secondary small mb-0">
-            Registered airframes stored in MySQL <code className="text-primary">aeropredict_db.aircraft</code>.
+            Comprehensive airframe registry, flight cycles, and engine telemetry assignments.
           </p>
         </div>
         <div className="d-flex gap-2">

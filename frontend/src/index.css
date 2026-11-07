@@ -1,4 +1,4 @@
-/* AeroPredict Aviation Design System - Inspired by 21st.dev Harbor Blue */
+/* AeroPredict Aviation Design System - Harbor Blue Palette */
 
 :root {
   --primary-navy: #0F172A;
@@ -148,7 +148,7 @@ body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
-/* Metric / Stat Cards (Inspired by 21st.dev) */
+/* Metric / Stat Cards */
 .stat-card {
   background: #FFFFFF;
   border-radius: 12px;
@@ -277,16 +277,4 @@ body {
   background-color: #F8FAFC;
 }
 
-/* Demonstration UI Watermark / Notice */
-.demo-banner {
-  background: linear-gradient(90deg, #194391 0%, #1E3A8A 100%);
-  color: #FFFFFF;
-  padding: 6px 16px;
-  font-size: 0.78rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-radius: 6px;
-  margin-bottom: 20px;
-}
+
