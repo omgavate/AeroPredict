@@ -2,25 +2,26 @@
 
 ## 1. High-Level Architecture Overview
 
-AeroPredict follows a decoupled, three-tier service-oriented architecture:
-1. **Client Presentation Tier (Frontend):** Modern Single Page Application (SPA) built with React and Vite.
+AeroPredict follows an enterprise-grade, decoupled three-tier service-oriented architecture:
+
+1. **Client Presentation Tier (Frontend):** Modern Single Page Application (SPA) built with React 18, Vite, Bootstrap 5, Recharts, and Lucide React icons following the Harbor Blue aviation design language.
 2. **Application & Analytics Tier (Backend & ML Engine):** Python Flask REST API server paired with a standalone Scikit-learn Machine Learning Prediction Service.
-3. **Data Persistence Tier (Database):** Relational database powered by MySQL Server storing aircraft specifications, simulated telemetry streams, predictions, and maintenance records.
+3. **Data Persistence Tier (Database):** MySQL Server 8.0 relational database storing airframe configurations, continuous 21-sensor C-MAPSS telemetry, RUL predictions, active alerts, and work orders.
 
 ```mermaid
 flowchart TD
-    subgraph Client["Presentation Tier (React SPA)"]
-        UI["React 18 + Vite UI"]
-        RTR["React Router"]
-        RC["Recharts & Lucide UI"]
-        AX["Axios HTTP Client"]
+    subgraph Client["Presentation Tier (React 18 SPA)"]
+        UI["React 18 Component Tree"]
+        RTR["React Router (7 Core Routes)"]
+        RC["Recharts Visual Analytics"]
+        AX["Axios API Client Layer"]
         UI --> RTR
         UI --> RC
         UI --> AX
     end
 
-    subgraph Server["Application Tier (Flask REST API)"]
-        FL["Flask Web Application (Port 5000)"]
+    subgraph Server["Application Tier (Flask REST API Server)"]
+        FL["Flask Application Factory (Port 5000)"]
         CORS["Flask-CORS Middleware"]
         VLD["Request Validation Layer"]
         SVC["Service Layer"]
@@ -31,30 +32,32 @@ flowchart TD
         
         subgraph Services["Core Business Services"]
             ACS["Aircraft Service"]
-            SNS["Sensor Telemetry Service"]
+            ENS["Engine & Sensor Service"]
+            PRS["Prediction Service"]
             MTS["Maintenance Service"]
             DBS["Dashboard Service"]
-            PRS["Prediction Service"]
         end
         
         SVC --> ACS
-        SVC --> SNS
+        SVC --> ENS
+        SVC --> PRS
         SVC --> MTS
         SVC --> DBS
-        SVC --> PRS
     end
 
-    subgraph MLTier["Machine Learning Pipeline"]
-        CMAPSS["NASA C-MAPSS FD001 Dataset"]
-        TRN["Model Trainer Script (RF Regressor)"]
-        MDL["Serialized Model & Scaler Artifacts (.joblib)"]
+    subgraph MLTier["Machine Learning Prognostic Pipeline"]
+        CMAPSS["NASA C-MAPSS FD001 Dataset (20,631 Train Rows)"]
+        FE["Causal Rolling Feature Extractor (45 Features)"]
+        TRN["Random Forest Trainer (100 Trees, GroupKFold CV)"]
+        MDL["Serialized Joblib Artifacts (.joblib)"]
         
-        CMAPSS --> TRN
+        CMAPSS --> FE
+        FE --> TRN
         TRN --> MDL
         MDL --> PRS
     end
 
-    subgraph DataTier["Persistence Tier (MySQL 8.0)"]
+    subgraph DataTier["Persistence Tier (MySQL Server 8.0)"]
         DBC["Connection Pool (mysql-connector-python)"]
         TBL1[("aircraft")]
         TBL2[("sensor_readings")]
@@ -69,172 +72,112 @@ flowchart TD
         DBC --> TBL5
     end
 
-    AX <-->|JSON / HTTP REST| FL
-    ACS & SNS & MTS & DBS <--> DBC
+    AX <-->|JSON over HTTP / REST| FL
+    ACS & ENS & PRS & MTS & DBS <--> DBC
 ```
 
 ---
 
 ## 2. Component Architecture Details
 
-### 2.1 Frontend Architecture (`frontend/`)
-The frontend is constructed as an asynchronous React Single Page Application initialized via Vite.
+### 2.1 Frontend Architecture (`frontend/src/`)
+Constructed as a modular, responsive Single Page Application (SPA) with clear separation between state, views, and network transports:
 
-- **Routing:** Handled declaratively with `react-router-dom`:
-  - `/` -> Dashboard
-  - `/aircraft` -> Aircraft Fleet Management (List, Add, Edit, Delete)
-  - `/aircraft/:id/monitoring` -> Engine Health Monitoring & Sensor Analytics
-  - `/aircraft/:id/predict` -> Predictive Maintenance & RUL Inference
-  - `/maintenance` -> Maintenance Work Orders & History
-- **API Communication:** Dedicated service layer (`api/` directory) wrapping Axios instances with base URL configurations, global error handling, and request timeouts.
-- **Visual Analytics:** `recharts` for interactive real-time multi-sensor telemetry graphs (ResponsiveContainer, LineChart, Tooltip, CartesianGrid, Legend).
-- **Styling:** Bootstrap 5 for grid layout, responsive typography, cards, and navigation headers, augmented with Lucide React icons.
+- **Client-Side Routing (`App.jsx`):**
+  - `/`: Executive Fleet Dashboard (KPIs, availability donut, maintenance distribution, health overview, active alerts)
+  - `/aircraft`: Fleet Inventory Management (List, search, filter, status toggles)
+  - `/aircraft/add`: Aircraft Registration Form with full field validations
+  - `/aircraft/:id`: Aircraft Diagnostics Profile & Edit Form
+  - `/monitoring`: Engine Health Monitoring & Sensor Analytics (`?unit=X&tail=Y`)
+  - `/predictive`: Predictive Maintenance & RUL Inference (`?id=X&tail=Y`)
+  - `/maintenance`: Maintenance Work Order Management & Backlog (`?aircraft_id=X`)
+- **API Client Layer (`src/api/`):**
+  - `apiClient.js`: Central Axios instance with base URL `http://localhost:5000/api`, 8000ms timeout, and error response unpacker.
+  - `aircraftApi.js`, `engineApi.js`, `predictionApi.js`, `maintenanceApi.js`, `dashboardApi.js`: Individual domain clients with seamless fallback to cached local datasets if backend is offline.
+- **Visual Analytics (`Recharts`):**
+  - Multi-sensor wear degradation curves (T30, T50, P30, Nc, BPR)
+  - Fleet Operational Availability Donut Chart (`PieChart`, `Pie`, `Cell`)
+  - Maintenance Work Order Distribution Bar Chart (`BarChart`, `Bar`)
+- **UI Components (`src/components/`):**
+  - `Navbar.jsx`, `Sidebar.jsx`, `MetricCard.jsx`, `StatusBadge.jsx`, `AlertCard.jsx`, `RulGauge.jsx`, `LoadingSpinner.jsx`.
+
+---
 
 ### 2.2 Backend Architecture (`backend/`)
-The backend is structured using Flask application factory and blueprint patterns to ensure clean separation of concerns and maintainability.
+Follows Flask's application factory pattern with blueprint modularity and business logic isolation:
 
-- **Entry Point (`backend/app.py`):** Configures app settings, registers blueprints, sets up CORS, and verifies database connectivity.
-- **Database Module (`backend/db/`):** Implements connection pooling (`mysql.connector.pooling`) to efficiently manage database connections, prevent connection leaks, and provide transaction management.
-- **Controllers / Routes (`backend/routes/`):**
-  - `aircraft_routes.py`: CRUD endpoints for aircraft assets.
-  - `sensor_routes.py`: Endpoints for current readings, historical sensor records, and cycle simulation.
-  - `prediction_routes.py`: Inference trigger endpoints passing sensor data to the ML prediction service.
-  - `maintenance_routes.py`: Work order lifecycle management.
-  - `dashboard_routes.py`: Aggregated operational metrics.
-- **Services (`backend/services/`):** Business logic separated from HTTP transport, facilitating testing and reusability.
-
-### 2.3 Machine Learning Pipeline Architecture (`ml_model/`)
-- **Training Pipeline (`ml_model/train.py`):**
-  - Ingests `train_FD001.txt`, `test_FD001.txt`, and `RUL_FD001.txt`.
-  - Computes ground-truth RUL for training engines ($RUL = max\_cycle - current\_cycle$, clipped at piecewise maximum $RUL_{max} = 125$).
-  - Discards invariant sensors that carry zero variance in FD001 (e.g. Sensors 1, 5, 6, 10, 16, 18, 19, and Setting 3).
-  - Normalizes feature vectors using `StandardScaler` fitted strictly on training engines.
-  - Trains a `RandomForestRegressor` with cross-validation partitioned strictly by **Engine Unit ID** (GroupKFold) to prevent temporal data leakage.
-  - Evaluates performance against the official test set using MAE and RMSE metrics.
-  - Persists artifacts (`random_forest_rul_model.joblib`, `scaler.joblib`, `feature_names.joblib`) into `ml_model/artifacts/`.
-- **Prediction Service (`backend/services/prediction_service.py`):**
-  - Loads serialized artifacts once during backend startup (lazy-singleton pattern).
-  - Validates feature schema and ordering for incoming sensor payloads.
-  - Transforms raw readings through saved scaler.
-  - Computes predicted RUL, maps RUL to risk level (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), and generates actionable engineering recommendations.
+- **Application Factory (`app.py`):** Configures app settings, registers all blueprints with centralized URL prefixes, configures CORS, and handles centralized HTTP error codes (400, 404, 405, 500).
+- **Database Configuration (`config/database.py`):** Initializes MySQL connection pool (`mysql.connector.pooling.MySQLConnectionPool`) with pool size of 5, providing thread-safe connection reuse, automatic schema creation, and health check utilities.
+- **REST Blueprints (`routes/`):**
+  - `health_routes.py`: System diagnostic health check (`GET /api/health`).
+  - `aircraft_routes.py`: Airframe CRUD operations (`/api/aircraft`).
+  - `engine_routes.py`: NASA C-MAPSS sensor readings, historical curves, cycle advancement (`/api/aircraft/<id>/sensors`, `/api/engine`).
+  - `prediction_routes.py`: Random Forest RUL inference (`POST /api/predict`), prediction history, model metadata.
+  - `maintenance_routes.py`: Work order lifecycle management (`/api/maintenance`).
+  - `dashboard_routes.py`: Aggregated executive metrics (`GET /api/dashboard`).
+- **Service Layer (`services/`):**
+  - `aircraft_service.py`: Fleet asset logic, validations, cascade deletes.
+  - `engine_service.py`: Sensor history extraction, cycle advance wear simulation, 7 subsystem diagnostic scoring.
+  - `prediction_service.py`: Singleton ML inference engine, physical sensor boundary validation, 45 rolling feature vector construction, RUL inference, risk tiering, recommendation mapping, MySQL alert creation.
+  - `maintenance_service.py`: Work order creation, status lifecycle transitions (`PENDING` $\rightarrow$ `IN_PROGRESS` $\rightarrow$ `COMPLETED`), automatic airframe status realignment.
+  - `dashboard_service.py`: Aggregated KPI calculations, fleet health scoring, alert feeds.
 
 ---
 
-## 3. Comprehensive Project Folder Structure
+### 2.3 Machine Learning Architecture (`ml_model/`)
 
+```mermaid
+flowchart LR
+    A["Raw C-MAPSS Data\n(train_FD001.txt)"] --> B["Drop 7 Invariant Sensors\n(std = 0)"]
+    B --> C["Piecewise RUL Capping\n(Max RUL = 125 cycles)"]
+    C --> D["Feature Engineering\n(45 Causal Rolling Features)"]
+    D --> E["StandardScaler\n(Zero Data Leakage)"]
+    E --> F["5-Fold GroupKFold CV\n(Split by Engine Unit ID)"]
+    F --> G["Random Forest Regressor\n(100 Trees, Depth 18)"]
+    G --> H["Evaluate Test Set\n(100 Engines, RUL_FD001.txt)"]
+    H --> I["Export Serialized Artifacts\n(.joblib & .json)"]
 ```
-d:/Aeropredict/
-│
-├── dataset/                               # NASA C-MAPSS raw data files
-│   ├── train_FD001.txt
-│   ├── test_FD001.txt
-│   ├── RUL_FD001.txt
-│   └── readme.txt
-│
-├── ml_model/                              # Offline ML modeling & serialization
-│   ├── artifacts/                         # Serialized models and scalers
-│   │   ├── random_forest_rul_model.joblib
-│   │   ├── scaler.joblib
-│   │   └── feature_names.joblib
-│   ├── __init__.py
-│   ├── data_loader.py                     # C-MAPSS dataset parser & cleaner
-│   ├── feature_engineering.py             # Feature selection, scaling & RUL targets
-│   ├── train.py                           # Training, GroupKFold validation, test eval
-│   └── evaluate.py                        # Model metrics (MAE, RMSE, R2, Error plots)
-│
-├── backend/                               # Flask REST API service
-│   ├── config.py                          # DB config, model paths, environment vars
-│   ├── app.py                             # Flask app factory & server runner
-│   ├── requirements.txt                   # Backend Python dependencies
-│   ├── db/
-│   │   ├── __init__.py
-│   │   ├── connection.py                  # MySQL connection pooling & cursor helpers
-│   │   └── schema.sql                     # DDL table creation & initial seed script
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   ├── aircraft_routes.py             # Fleet CRUD API
-│   │   ├── sensor_routes.py               # Telemetry and sensor history API
-│   │   ├── prediction_routes.py           # RUL inference API
-│   │   ├── maintenance_routes.py          # Work orders & task status API
-│   │   └── dashboard_routes.py            # Overview statistics API
-│   ├── services/
-│   │   ├── __init__.py
-│   │   ├── aircraft_service.py            # Fleet business logic
-│   │   ├── sensor_service.py              # Sensor querying & simulation logic
-│   │   ├── prediction_service.py          # Model inference wrapper
-│   │   ├── maintenance_service.py         # Maintenance lifecycle logic
-│   │   └── dashboard_service.py           # KPI calculation logic
-│   └── tests/
-│       ├── test_db_connection.py          # MySQL health check test
-│       ├── test_api_endpoints.py          # Flask test client unit/integration tests
-│       └── test_prediction_service.py      # ML inference test with sample sensor input
-│
-├── frontend/                              # React.js Vite Single Page Application
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── index.html
-│   └── src/
-│       ├── main.jsx                       # React entry point
-│       ├── App.jsx                        # Root component with Router navigation
-│       ├── index.css                      # Global styles and custom overrides
-│       ├── api/                           # Axios API service clients
-│       │   ├── apiClient.js               # Axios instance with base URL & interceptors
-│       │   ├── aircraftApi.js
-│       │   ├── sensorApi.js
-│       │   ├── predictionApi.js
-│       │   ├── maintenanceApi.js
-│       │   └── dashboardApi.js
-│       ├── components/                    # Reusable UI widgets
-│       │   ├── Navbar.jsx                 # Top navigation bar
-│       │   ├── Sidebar.jsx                # Navigation menu
-│       │   ├── StatusBadge.jsx            # Risk and operational status pill
-│       │   ├── LoadingSpinner.jsx         # Loading state indicator
-│       │   └── ErrorAlert.jsx             # User error notification card
-│       └── pages/                         # Core module pages
-│           ├── DashboardPage.jsx          # Module 1: Executive Dashboard
-│           ├── AircraftListPage.jsx       # Module 2: Fleet Management (List/Search)
-│           ├── AircraftFormModal.jsx      # Module 2: Add/Edit Modal
-│           ├── EngineMonitoringPage.jsx   # Module 3: Sensor charts & simulation
-│           ├── PredictiveMaintenancePage.jsx # Module 4: RUL inference & risk
-│           └── MaintenancePage.jsx        # Module 5: Work order management
-│
-├── documentation/                         # Project reports and documentation
-│   ├── PROJECT_SPEC.md                    # Core project specifications
-│   ├── ARCHITECTURE.md                    # System architecture design (this document)
-│   ├── DATABASE_SCHEMA.md                 # Database schema & ER diagrams
-│   ├── IMPLEMENTATION_PLAN.md             # Development milestones & roadmap
-│   └── PROGRESS.md                        # Milestone completion tracker
-│
-├── README.md                              # Project setup and user guide
-└── .gitignore                             # Ignored paths (node_modules, venv, cache)
-```
+
+- **Data Ingestion:** Reads space-delimited NASA C-MAPSS FD001 matrix (100 training engines, 100 test engines).
+- **Variance Filtering:** Drops 7 invariant sensor channels with zero variance across all cycles (`sensor_1`, `sensor_5`, `sensor_6`, `sensor_10`, `sensor_16`, `sensor_18`, `sensor_19`).
+- **Piecewise Linear Target Formulation:** Caps Remaining Useful Life at 125 cycles during early operating stages to reflect negligible thermodynamic degradation before initial micro-wear onset.
+- **Causal Feature Engineering:** Generates 45 features including elapsed cycles, operational settings, 14 active sensors, 14 rolling means (window $W=5$), and 14 rolling standard deviations (window $W=5$).
+- **Zero-Leakage GroupKFold CV:** Splits training set into 5 folds strictly grouped by `unit_number` so an engine's earlier cycles never appear in both training and validation splits.
+- **Model Training:** `RandomForestRegressor(n_estimators=100, max_depth=18, min_samples_split=5, min_samples_leaf=2, max_features=0.7, random_state=42)`.
+- **Inference Runtime:** Pre-loads serialized model and scaler once on startup. Evaluates RUL in $<30\text{ ms}$ without retraining during requests.
 
 ---
 
-## 4. End-to-End Prediction Sequence Diagram
+## 3. End-to-End Prediction & Maintenance Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Engineer as Flight Maintenance Engineer
-    participant UI as React UI (PredictiveMaintenancePage)
-    participant API as Flask API (/api/predict/rul/:id)
-    participant SVC as Prediction Service
-    participant Model as Serialized RF Model (.joblib)
-    participant DB as MySQL Database
+    actor Tech as Aircraft Engineer / Technician
+    participant UI as React UI (Dashboard / Prognostics)
+    participant API as Flask REST API Server
+    participant Pred as Prediction Service (Random Forest)
+    participant DB as MySQL Database (aeropredict_db)
 
-    Engineer->>UI: Clicks "Run Predictive RUL Analysis"
-    UI->>API: POST /api/predict/rul/101 (aircraft_id)
-    API->>DB: Fetch latest sensor cycle data for aircraft 101
-    DB-->>API: Returns 21 sensor values + operating settings
-    API->>SVC: predict_rul(sensor_payload)
-    SVC->>SVC: Preprocess: Select active features & scale
-    SVC->>Model: predict(scaled_features)
-    Model-->>SVC: Returns raw RUL estimate (e.g. 42.5 cycles)
-    SVC->>SVC: Compute Risk Category (e.g. MEDIUM) & Recommendation
-    SVC-->>API: Returns {predicted_rul: 42.5, risk: "MEDIUM", recommendation: "..."}
-    API->>DB: Insert record into `rul_predictions` table
-    DB-->>API: Acknowledged
-    API-->>UI: 200 OK JSON response
-    UI-->>Engineer: Renders RUL gauge, degradation risk level & action item
+    Tech->>UI: Select Aircraft (e.g. N101AP) & Request RUL
+    UI->>API: POST /api/predict {aircraft_id: 1, cycle: 192, telemetry: {...}}
+    API->>Pred: validate_telemetry_payload(data)
+    Pred->>DB: Verify aircraft exists & fetch baseline cycles
+    DB-->>Pred: Aircraft Record (ID #1, Unit #1)
+    Pred->>Pred: Construct 45-feature causal vector
+    Pred->>Pred: Standardize features via scaler.joblib
+    Pred->>Pred: Predict RUL via random_forest_rul_model.joblib
+    Note over Pred: Result: RUL = 6.2 cycles (CRITICAL Risk)
+    Pred->>Pred: Map actionable recommendations
+    Pred->>DB: INSERT INTO rul_predictions (aircraft_id, cycle, rul, risk, rec)
+    Pred->>DB: INSERT INTO maintenance_alerts (aircraft_id, RUL_CRITICAL, severity: CRITICAL)
+    Pred-->>API: Structured Prediction Payload
+    API-->>UI: 200 OK {predicted_rul: 6.2, risk_level: "CRITICAL", alert_created: true}
+    UI->>Tech: Display RUL Gauge (6.2 cycles), Alert Banner & Actionable Card
+    Tech->>UI: Click "Schedule Maintenance"
+    UI->>API: POST /api/maintenance {aircraft_id: 1, title: "HPC Blade Replacement", priority: "CRITICAL"}
+    API->>DB: INSERT INTO maintenance_records & UPDATE aircraft status = 'ATTENTION_REQUIRED'
+    DB-->>API: 201 Created (Work Order #1)
+    API-->>UI: Work Order Confirmed
+    UI->>Tech: Display Updated Maintenance Backlog & Dashboard Status
 ```
