@@ -46,9 +46,9 @@ DEFAULT_RISK_THRESHOLDS = {
 }
 
 EDUCATIONAL_DISCLAIMER = (
-    "EDUCATIONAL NOTICE: AeroPredict is an academic MCA college demonstration prototype "
-    "trained on NASA C-MAPSS simulation data. Prognostic predictions and maintenance "
-    "recommendations are illustrative and are not certified by the FAA, EASA, or any civil aviation authority."
+    "OPERATIONAL NOTICE: AeroPredict turbofan health prognostic engine is trained on "
+    "NASA C-MAPSS simulation telemetry. Inferences and maintenance recommendations are "
+    "decision-support outputs based on thermodynamic feature degradation modeling."
 )
 
 # Physical plausible sensor bounds for NASA C-MAPSS turbofan engines
@@ -115,7 +115,7 @@ class PredictionService:
             logger.error(f"Model artifacts not found in {ARTIFACTS_DIR}")
             raise ModelArtifactError(
                 f"Trained model artifacts not found at {ARTIFACTS_DIR}. "
-                "Ensure Phase 6 training has completed."
+                "Ensure model training has completed."
             )
 
         try:

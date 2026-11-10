@@ -1,5 +1,5 @@
 """
-End-to-End Workflow Integration Test for AeroPredict (Phase 12 Task 5).
+End-to-End Workflow Integration Test for AeroPredict.
 Validates the complete 7-step lifecycle:
 1. Add aircraft
 2. View aircraft

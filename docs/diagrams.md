@@ -1,6 +1,6 @@
 # AeroPredict - Comprehensive Architectural Diagrams
 
-This document collects all official UML and structural diagrams for the **AeroPredict** platform, formatted in standard Mermaid syntax.
+This document contains the structural, behavioral, and data flow diagrams for the **AeroPredict** platform, formatted in standard Mermaid syntax.
 
 ---
 
@@ -9,10 +9,10 @@ This document collects all official UML and structural diagrams for the **AeroPr
 ```mermaid
 flowchart TD
     subgraph Client["Presentation Tier (React 18 SPA)"]
-        UI["React 18 UI (Vite + Bootstrap 5)"]
+        UI["React 18 UI (Vite + Tailwind CSS)"]
         RTR["React Router (7 Core Routes)"]
         RC["Recharts Visual Analytics"]
-        AX["Axios HTTP Interceptor Layer"]
+        AX["Axios HTTP Client Layer"]
         UI --> RTR
         UI --> RC
         UI --> AX
@@ -45,8 +45,8 @@ flowchart TD
 
     subgraph Prognostics["Machine Learning Pipeline"]
         CMAPSS["NASA C-MAPSS FD001 (20,631 records)"]
-        FE["Causal Rolling Feature Extractor (45 features)"]
-        RF["Random Forest Regressor (100 Trees, Depth 18)"]
+        FE["Rolling Feature Extractor (45 features)"]
+        RF["Random Forest Regressor (100 Trees, Depth 15)"]
         MDL["Serialized Joblib Artifacts (.joblib & .json)"]
         
         CMAPSS --> FE --> RF --> MDL
@@ -58,8 +58,8 @@ flowchart TD
         T1[("aircraft")]
         T2[("sensor_readings")]
         T3[("rul_predictions")]
-        T4[("maintenance_alerts")]
-        T5[("maintenance_records")]
+        T4[("maintenance_records")]
+        T5[("engine_health_summary")]
         
         POOL --> T1
         POOL --> T2
@@ -88,11 +88,11 @@ flowchart LR
         UC1["View Executive Dashboard & KPIs"]
         UC2["Register & Manage Aircraft Assets"]
         UC3["Monitor Real-Time Multi-Sensor Telemetry"]
-        UC4["Simulate Engine Wear Cycles"]
+        UC4["Review Multi-Sensor Degradation Curves"]
         UC5["Request Prognostic RUL Inference"]
         UC6["Review Prescribed Maintenance Actions"]
         UC7["Create & Update Work Orders"]
-        UC8["Acknowledge & Resolve Active Alerts"]
+        UC8["Track Fleet Maintenance Lifecycle"]
     end
 
     FE --> UC1
@@ -119,8 +119,8 @@ flowchart LR
 erDiagram
     AIRCRAFT ||--o{ SENSOR_READINGS : "transmits telemetry"
     AIRCRAFT ||--o{ RUL_PREDICTIONS : "receives predictions"
-    AIRCRAFT ||--o{ MAINTENANCE_ALERTS : "triggers alerts"
     AIRCRAFT ||--o{ MAINTENANCE_RECORDS : "undergoes maintenance"
+    AIRCRAFT ||--o{ ENGINE_HEALTH_SUMMARY : "summarizes status"
 
     AIRCRAFT {
         int id PK "Auto Increment"
@@ -148,26 +148,13 @@ erDiagram
         timestamp recorded_at
     }
 
-    MAINTENANCE_ALERTS {
-        bigint id PK "Auto Increment"
-        int aircraft_id FK "References aircraft(id)"
-        enum alert_type "RUL_CRITICAL, RUL_WARNING, SENSOR_ANOMALY, MAINTENANCE_DUE"
-        enum severity "LOW, MEDIUM, HIGH, CRITICAL"
-        varchar message "Alert descriptive summary"
-        int cycle "Telemetry cycle at trigger"
-        decimal predicted_rul "Predicted RUL at trigger"
-        boolean is_resolved "Resolution flag"
-        timestamp resolved_at
-        timestamp created_at
-    }
-
     MAINTENANCE_RECORDS {
         int id PK "Auto Increment"
         int aircraft_id FK "References aircraft(id)"
         varchar title "Work order title"
         text description "Detailed maintenance description"
         enum priority "LOW, MEDIUM, HIGH, CRITICAL"
-        enum status "PENDING, SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED"
+        enum status "PENDING, IN_PROGRESS, COMPLETED"
         date scheduled_date "Planned maintenance date"
         date completed_date "Actual completion date"
         text technician_notes "Notes entered upon inspection"
@@ -183,6 +170,14 @@ erDiagram
         enum risk_level "LOW, MEDIUM, HIGH, CRITICAL"
         text recommendation "Automated maintenance prescription"
         timestamp predicted_at
+    }
+
+    ENGINE_HEALTH_SUMMARY {
+        int id PK "Auto Increment"
+        int aircraft_id FK "References aircraft(id)"
+        decimal health_index "Composite health index (0-100)"
+        varchar primary_risk "Dominant failure mode"
+        timestamp updated_at
     }
 ```
 
@@ -203,61 +198,26 @@ flowchart TD
     P3 -->|Construct 45-Feature Vector| M1["Random Forest Model (.joblib)"]
     M1 -->|Predicted RUL Cycles| P3
     P3 -->|Persist Inferred RUL| D2[("rul_predictions")]
-    P3 -->|If Critical/High Risk| D3[("maintenance_alerts")]
-    P3 -->|RUL Gauge & Prescriptions| User
+    P3 -->|RUL Value & Recommendations| User
 
     User -->|Submit Work Order| P4["4.0 Maintenance Management"]
     P4 -->|Write Work Order Record| D4[("maintenance_records")]
     P4 -->|Update Aircraft Status| D5[("aircraft")]
     P4 -->|Updated Work Order Backlog| User
 
-    D1 & D2 & D3 & D4 & D5 --> P5["5.0 Executive Dashboard Aggregator"]
+    D1 & D2 & D4 & D5 --> P5["5.0 Executive Dashboard Aggregator"]
     P5 -->|KPI Metrics & Visual Charts| User
 ```
 
 ---
 
-## 5. Activity Diagram (Operational Lifecycle)
-
-```mermaid
-flowchart TD
-    Start(["Start Application"]) --> Login["Access Executive Dashboard"]
-    Login --> SelectNav{"Select Module"}
-
-    SelectNav -->|"Fleet Assets"| ViewFleet["View Fleet Inventory"]
-    ViewFleet --> ActionFleet{"Action?"}
-    ActionFleet -->|"Add Aircraft"| RegAircraft["Input Details & Save to MySQL"] --> ViewFleet
-    ActionFleet -->|"Telemetry"| ViewTelemetry
-    ActionFleet -->|"Prognostics"| ViewPrognostics
-
-    SelectNav -->|"Telemetry"| ViewTelemetry["Inspect 21-Sensor Telemetry Matrix"]
-    ViewTelemetry --> AdvCycle{"Advance Cycle?"}
-    AdvCycle -->|"Yes"| IngestWear["Simulate C-MAPSS Wear Step"] --> UpdateCurves["Update Recharts Degradation Curves"] --> ViewTelemetry
-    AdvCycle -->|"No"| ViewTelemetry
-
-    SelectNav -->|"Prognostics"| ViewPrognostics["Run RUL Inference"]
-    ViewPrognostics --> EvalRisk{"Evaluate RUL Risk"}
-    EvalRisk -->|"RUL > 75 (Low)"| LowRisk["Mark Nominal - Schedule A-Check"]
-    EvalRisk -->|"31-75 (Medium)"| MedRisk["Place on Watchlist - Monitor Borescope"]
-    EvalRisk -->|"11-30 (High)"| HighRisk["Trigger RUL_WARNING Alert & Plan Shop Visit"]
-    EvalRisk -->|"<= 10 (Critical)"| CritRisk["Trigger RUL_CRITICAL Alert & Ground Aircraft"]
-
-    HighRisk --> CreateWO["Create Maintenance Work Order"]
-    CritRisk --> CreateWO
-    CreateWO --> TrackWO["Assign Technician & Transition Status: PENDING -> IN_PROGRESS -> COMPLETED"]
-    TrackWO --> ResolveAlert["Acknowledge & Resolve Alert"]
-    ResolveAlert --> EndCycle(["Update Dashboard KPIs & End"])
-```
-
----
-
-## 6. Machine Learning Workflow Diagram
+## 5. Machine Learning Pipeline Diagram
 
 ```mermaid
 flowchart LR
     subgraph DataPrep["1. Ingestion & Preprocessing"]
         RAW["NASA C-MAPSS FD001\n(20,631 train rows)"]
-        DROP["Drop 7 Invariant Sensors\n(std = 0)"]
+        DROP["Drop 7 Invariant Sensors\n(zero variance)"]
         CAP["Piecewise Linear RUL\n(Cap at 125 cycles)"]
         RAW --> DROP --> CAP
     end
@@ -269,16 +229,16 @@ flowchart LR
         CAP --> BASE & RMEAN & RSTD
     end
 
-    subgraph Validation["3. Zero-Leakage Cross-Validation"]
+    subgraph Validation["3. Cross-Validation & Normalization"]
         VEC["45-Dimensional Causal Vector"]
         BASE & RMEAN & RSTD --> VEC
-        GKF["5-Fold GroupKFold CV\n(Split by Engine unit_number)"]
-        SCL["StandardScaler\n(Fitted on Train Split Only)"]
+        GKF["5-Fold GroupKFold CV\n(Split by Engine unit)"]
+        SCL["MinMaxScaler\n(Fitted on Train Split Only)"]
         VEC --> GKF --> SCL
     end
 
     subgraph ModelTrain["4. Model Training & Export"]
-        RF["Random Forest Regressor\n(100 Trees, Depth 18, MinLeaf 2)"]
+        RF["Random Forest Regressor\n(100 Trees, Depth 15, MinLeaf 2)"]
         EVAL["Evaluate on 100 Test Engines\n(MAE: 12.70, RMSE: 17.72)"]
         ART["Serialized Artifacts\n(Model, Scaler, Feature List)"]
         SCL --> RF --> EVAL --> ART

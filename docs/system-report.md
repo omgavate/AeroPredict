@@ -1,91 +1,6 @@
-# AEROPREDICT: AI-POWERED AIRCRAFT ENGINE HEALTH MONITORING AND PREDICTIVE MAINTENANCE SYSTEM
+# AeroPredict - Comprehensive Engineering & Technical Report
 
----
-
-## 1. TITLE PAGE
-
-```
-================================================================================
-                                A PROJECT REPORT
-                                       ON
-                                  AEROPREDICT
-        AI-Powered Aircraft Engine Health Monitoring and Predictive
-                             Maintenance System
-
-                  Submitted in partial fulfillment of the requirements
-                             for the award of the degree of
-                        MASTER OF COMPUTER APPLICATIONS (MCA)
-
-                                  Submitted By:
-                             [Candidate Name / Roll No.]
-
-                            Under the Guidance of:
-                             [Project Guide Name]
-                            [Designation / Department]
-
-                       DEPARTMENT OF COMPUTER APPLICATIONS
-                      [COLLEGE / INSTITUTION NAME HERE]
-                        [AFFILIATED UNIVERSITY NAME]
-                                [ACADEMIC YEAR]
-================================================================================
-```
-
----
-
-## 2. CERTIFICATE
-
-```
-                                 CERTIFICATE
-
-This is to certify that the project report entitled "AEROPREDICT: AI-POWERED
-AIRCRAFT ENGINE HEALTH MONITORING AND PREDICTIVE MAINTENANCE SYSTEM" submitted
-by [Candidate Name / Roll Number] in partial fulfillment of the requirements for
-the award of the degree of MASTER OF COMPUTER APPLICATIONS of [University Name],
-is a bonafide record of the work carried out by them under my supervision and
-guidance during the academic year [Academic Year].
-
-
-
-__________________________                    __________________________
-   [Project Guide Name]                          [Head of Department]
-        Project Guide                             Department of MCA
-  [College / Institution]                       [College / Institution]
-
-
-
-External Examiner: __________________________
-Date of Viva Voce: __________________________
-```
-
----
-
-## 3. ACKNOWLEDGEMENT
-
-```
-                               ACKNOWLEDGEMENT
-
-I express my deepest gratitude to our Principal, [Principal Name], and the Head
-of the Department of Computer Applications, [HOD Name], for providing the academic
-infrastructure, laboratory facilities, and encouragement to execute this capstone
-mini-project.
-
-I am profoundly indebted to my project guide, [Project Guide Name], for their
-invaluable advice, continuous technical guidance, and constructive critiques throughout
-the system architecture, machine learning development, and implementation phases.
-
-I also extend my sincere appreciation to the faculty members, technical laboratory
-staff, and my peers for their generous cooperation and intellectual support. Finally,
-I thank my family and friends for their enduring patience and encouragement.
-
-
-                                              [Candidate Name / Signature]
-                                              Roll Number: [Roll Number]
-                                              Department of Computer Applications
-```
-
----
-
-## 4. ABSTRACT
+## 1. EXECUTIVE SUMMARY & ABSTRACT
 
 Unscheduled commercial aircraft maintenance and in-flight propulsion system anomalies present severe economic losses, operational disruptions, and safety risks in modern commercial aviation. Traditional aircraft maintenance adheres primarily to corrective (run-to-failure) or rigid scheduled preventative protocols (flight-hour intervals), which fail to dynamically reflect real-time thermodynamic degradation across core turbine subsystems. 
 
@@ -100,7 +15,7 @@ To eliminate temporal data leakage, AeroPredict implements causal rolling featur
 
 ---
 
-## 5. INTRODUCTION
+## 2. INTRODUCTION
 
 Modern commercial turbofan engines are complex thermodynamic assemblies operating under extreme thermal and mechanical stresses. Over accumulated flight cycles, components such as fan blades, low-pressure compressors (LPC), high-pressure compressors (HPC), combustors, and high/low-pressure turbines (HPT/LPT) suffer progressive degradation due to thermal creep, blade tip clearance erosion, cyclic fatigue, and fouling.
 
@@ -112,7 +27,7 @@ Predictive Maintenance (PdM) leverages Condition-Based Monitoring (CBM) and Mach
 
 ---
 
-## 6. PROBLEM STATEMENT
+## 3. PROBLEM STATEMENT
 
 Commercial aviation operators and maintenance, repair, and overhaul (MRO) facilities face three critical operational bottlenecks:
 1. **Unplanned Downtime & Economic Penalty:** Engine failure or abrupt sensor degradation discovered during pre-flight checks causes severe cascading delays and costly emergency maintenance dispatch.
@@ -123,9 +38,9 @@ Commercial aviation operators and maintenance, repair, and overhaul (MRO) facili
 
 ---
 
-## 7. OBJECTIVES
+## 4. TECHNICAL OBJECTIVES
 
-The primary technical and academic objectives of the AeroPredict project are:
+The primary technical and operational objectives of the AeroPredict platform are:
 1. **Dataset Preprocessing & Integrity:** Ingest and statistically audit the NASA C-MAPSS FD001 dataset, removing non-informative zero-variance sensors and structuring run-to-failure cycle trajectories.
 2. **Causal Feature Engineering:** Formulate 45 causal time-series features (including backward rolling means and standard deviations over 5-cycle sliding windows) to capture dynamic degradation rates without future-data leakage.
 3. **Prognostic Machine Learning Modeling:** Train and evaluate an ensemble Random Forest Regressor to predict Remaining Useful Life in operating cycles, employing piecewise linear RUL capping ($\le 125\text{ cycles}$) and 5-fold GroupKFold validation.
@@ -137,7 +52,7 @@ The primary technical and academic objectives of the AeroPredict project are:
 
 ## 8. EXISTING SYSTEM
 
-Existing industrial and legacy academic maintenance systems typically exhibit the following characteristics:
+Existing industrial and conventional maintenance systems typically exhibit the following characteristics:
 
 | Feature / Aspect | Existing / Legacy System | Limitations |
 | :--- | :--- | :--- |
@@ -509,7 +424,7 @@ flowchart LR
 
 ---
 
-## 19. RESULTS & EMPIRICAL FINDINGS
+## 16. RESULTS & EMPIRICAL FINDINGS
 
 - **Cross-Validation Accuracy:** Achieved an average MAE of **11.17 cycles** across 5 folds with an $R^2$ score of **0.8419**.
 - **Independent Test Evaluation:** Evaluated on 100 held-out engines from `test_FD001.txt` against true RUL values in `RUL_FD001.txt`. Achieved capped MAE of **12.70 cycles** and RMSE of **17.72 cycles**.
@@ -518,15 +433,15 @@ flowchart LR
 
 ---
 
-## 20. LIMITATIONS
+## 17. LIMITATIONS
 
 1. **Single Operating Flight Condition:** Model trained specifically on NASA C-MAPSS FD001 (Sea Level, 0 ft altitude, Mach 0.0). Multi-condition datasets (FD002, FD004) require altitude/Mach clustering normalization.
 2. **Simulated vs. Physical Testbed:** Telemetry is sourced from NASA's numerical aero-propulsion simulation code rather than direct physical engine test cells.
-3. **Single-Node MySQL Architecture:** Designed for single-server relational deployments appropriate for academic presentation.
+3. **Single-Node MySQL Architecture:** Designed for single-server relational deployments with horizontal read-replica readiness.
 
 ---
 
-## 21. FUTURE SCOPE
+## 18. FUTURE SCOPE
 
 1. **Deep Learning Prognostics:** Incorporate bidirectional LSTM or Temporal Convolutional Networks (TCN) to model longer-range sequential dependencies.
 2. **Multi-Condition Generalization:** Extend preprocessing to NASA C-MAPSS FD002 and FD004 subsets covering 6 operating conditions and multiple failure modes.
@@ -535,7 +450,7 @@ flowchart LR
 
 ---
 
-## 22. CONCLUSION
+## 19. CONCLUSION
 
 The **AeroPredict** platform demonstrates a practical, end-to-end implementation of an AI-powered predictive maintenance and real-time engine health monitoring system for commercial aviation. By combining multi-sensor thermodynamic telemetry from the NASA C-MAPSS FD001 benchmark with a rigorously validated Random Forest Regressor, the system delivers an RUL prediction error under 13 flight cycles without temporal data leakage. 
 
@@ -543,7 +458,7 @@ The three-tier architecture cleanly integrates an enterprise-style React 18 user
 
 ---
 
-## 23. REFERENCES
+## 20. REFERENCES
 
 1. A. Saxena, K. Goebel, D. Simon, and N. Eklund, *"Damage Propagation Modeling for Aircraft Engine Run-to-Failure Simulation"*, In Proceedings of the 1st International Conference on Prognostics and Health Management (PHM08), Denver, CO, 2008.
 2. F. O. Heimes, *"Recurrent neural networks for remaining useful life estimation"*, In 2008 International Conference on Prognostics and Health Management, IEEE, 2008.

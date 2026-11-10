@@ -2,6 +2,7 @@
   "name": "aeropredict-frontend",
   "private": true,
   "version": "1.0.0",
+  "description": "AeroPredict - AI-Powered Aircraft Engine Health Monitoring and Predictive Maintenance Interface",
   "type": "module",
   "scripts": {
     "dev": "vite",

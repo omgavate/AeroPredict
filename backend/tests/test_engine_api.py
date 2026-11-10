@@ -1,5 +1,5 @@
 """
-Automated Unit and Integration Tests for Engine Health Monitoring REST API (Phase 8).
+Automated Unit and Integration Tests for Engine Health Monitoring REST API.
 Validates latest readings, cycle progression, sensor history, subsystem diagnostics,
 input validations, error handling, and C-MAPSS dataset mapping notices.
 """

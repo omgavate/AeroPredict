@@ -1,4 +1,4 @@
-"""Database Audit Script for Phase 12."""
+"""Database Integrity and Schema Audit Script."""
 import sys
 from pathlib import Path
 

@@ -94,7 +94,7 @@ def ensure_maintenance_seeded():
 
 def validate_maintenance_payload(data, is_update=False):
     """
-    Validates work order fields according to Phase 10 requirements:
+    Validates work order fields according to system requirements:
     - Aircraft ID: positive integer, must exist in `aircraft` table
     - Title / Issue Description: 3-150 characters, non-empty
     - Scheduled Date: valid YYYY-MM-DD

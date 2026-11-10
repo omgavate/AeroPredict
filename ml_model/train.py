@@ -88,7 +88,7 @@ def evaluate_predictions(y_true, y_pred, label=""):
 
 def train_and_evaluate():
     """
-    Orchestrates the complete Phase 6 training and evaluation pipeline:
+    Orchestrates the complete model training and evaluation pipeline:
     1. Preprocesses train and test datasets.
     2. Performs 5-fold GroupKFold cross-validation on train units (zero engine leakage).
     3. Trains final RandomForestRegressor model on full training set.

@@ -1,5 +1,5 @@
 """
-Automated Unit and Integration Tests for Maintenance Management REST API (Phase 10).
+Automated Unit and Integration Tests for Maintenance Management REST API.
 Tests create, read, update, delete operations, validation errors, status transitions,
 and aircraft history queries.
 """

@@ -66,7 +66,7 @@ def create_app(test_config=None):
             'status': 'online',
             'endpoints': {
                 'health': '/api/health',
-                'documentation': '/api/docs (Phase 4)'
+                'documentation': '/docs'
             }
         }), 200
 
