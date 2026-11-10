@@ -22,10 +22,9 @@ backend/wheels/
 backend/cache/
 *.log
 
-# NASA C-MAPSS Dataset (Kept local, excluded from Git repo)
-dataset/*.txt
-dataset/*.csv
+# Dataset archives (raw text files train_FD001, test_FD001, RUL_FD001 are included for turnkey reproducibility)
 dataset/*.zip
+dataset/*.csv
 
 # Node & Frontend Build
 frontend/node_modules/
